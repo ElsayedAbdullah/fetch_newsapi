@@ -3,9 +3,18 @@ let articles = '';
 let category = 'general';
 let country = 'us';
 
+// pagination for articles to display only six on page
+const pagination = document.getElementById("pagination");
+
+let items_per_page = 6;
+let currentPage = 1;
+
+let start = (currentPage - 1) * items_per_page;
+let end = start + items_per_page;
+
 // trigger the getArticles function when the page load
 getArticles(country,category);
-
+// displayArticles(start, end);
 // select all nav links and add click event on it to change the category of newsapi
 let navLinks = document.querySelectorAll('.nav-link');
 navLinks.forEach(function(link) {
@@ -31,15 +40,17 @@ function getArticles(country,category) {
   .then(res => res.json())
   .then(data => {
     articles = data.articles;
-    displayArticles();
+    displayArticles(start,end);
+    createPagination()
   })
   .catch(err=> console.log(err))
 }
 
 // function to display articles in the page
-function displayArticles() {
+function displayArticles(start, end) {
   let temp = "";
-  articles.forEach((article) => {
+  document.querySelector('.articles .row').innerHTML = "";
+  articles.slice(start, end).forEach((article) => {
     temp += `
     <div class="col-md-6 col-lg-4">
       <div class="article text-center">
@@ -51,4 +62,28 @@ function displayArticles() {
     `
     document.querySelector('.articles .row').innerHTML = temp
   });
+  
 }
+
+function createPagination() {
+  pagination.innerHTML = "";
+  let pages = Math.ceil(articles.length / items_per_page);
+  for (let i = 0; i < pages; i++) {
+    pagination.innerHTML += `<button onclick="paginateItems(${i + 1})">${i + 1}</button>`;
+  }
+}
+
+function paginateItems(c) {
+  let start = (c - 1) * items_per_page;
+  let end = start + items_per_page;
+  displayArticles(start, end);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+
+
+
+
+// if(articles.length > items_per_page) {
+//   createPagination()
+// }
